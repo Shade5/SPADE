@@ -86,13 +86,12 @@ def tensor2im(image_tensor, imtype=np.uint8, normalize=True, tile=False):
         image_tensor = image_tensor.unsqueeze(0)
     image_numpy = image_tensor.detach().cpu().float().numpy()
     if normalize:
-        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+        image_numpy = (image_numpy + 1) / 2.0
     else:
         image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0
-    image_numpy = np.clip(image_numpy, 0, 255)
     if image_numpy.shape[2] == 1:
         image_numpy = image_numpy[:, :, 0]
-    return image_numpy.astype(imtype)
+    return image_numpy
 
 
 # Converts a one-hot tensor into a colorful label map
@@ -120,9 +119,8 @@ def tensor2label(label_tensor, n_label, imtype=np.uint8, tile=False):
     if label_tensor.size()[0] > 1:
         label_tensor = label_tensor.max(0, keepdim=True)[1]
     label_tensor = Colorize(n_label)(label_tensor)
-    label_numpy = np.transpose(label_tensor.numpy(), (1, 2, 0))
-    result = label_numpy.astype(imtype)
-    return result
+    label_numpy = label_tensor.numpy()/255.0
+    return label_numpy
 
 
 def save_image(image_numpy, image_path, create_dir=False):
