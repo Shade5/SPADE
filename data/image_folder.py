@@ -20,7 +20,7 @@ IMG_EXTENSIONS = [
 
 
 def is_image_file(filename):
-    return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
+    return any(filename.endswith(extension) for extension in IMG_EXTENSIONS) and 'resize_512' not in filename
 
 
 def make_dataset_rec(dir, images):
