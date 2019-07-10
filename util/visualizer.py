@@ -12,7 +12,6 @@ from tensorboardX import SummaryWriter
 class Visualizer():
     def __init__(self, opt):
         self.opt = opt
-        self.tf_log = opt.isTrain and opt.tf_log
         self.use_html = opt.isTrain and not opt.no_html
         self.win_size = opt.display_winsize
         self.name = opt.name
@@ -29,16 +28,14 @@ class Visualizer():
     def display_current_results(self, visuals, epoch, step):
         visuals = self.convert_visuals_to_numpy(visuals)
                 
-        if self.tf_log:  # show images in tensorboard output
-            for label, image_numpy in visuals.items():
-                self.writer.add_image(label, image_numpy, epoch)
+        for label, image_numpy in visuals.items():
+            self.writer.add_image(label, image_numpy, epoch)
 
     # errors: dictionary of error labels and values
     def plot_current_errors(self, errors, step):
-        if self.tf_log:
-            for tag, value in errors.items():
-                value = value.mean().float()
-                self.writer.add_scalar('loss/' + tag, value, step)
+        for tag, value in errors.items():
+            value = value.mean().float()
+            self.writer.add_scalar('loss/' + tag, value, step)
 
     # errors: same format as |errors| of plotCurrentErrors
     def print_current_errors(self, epoch, i, errors, t):
@@ -59,7 +56,9 @@ class Visualizer():
             if 'input_label' == key:
                 t = util.tensor2label(t, self.opt.label_nc + 2, tile=tile)
             else:
-                t = util.tensor2im(t)[0]
+                t = util.tensor2im(t)
+                if len(t.shape) == 4:
+                    t = t[0]
             visuals[key] = t
         return visuals
 
